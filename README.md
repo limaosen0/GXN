@@ -14,7 +14,10 @@ This implementation is under the "lib/" directory, run
 ```
 make -j4
 ```
-to compile the necessary c++ files.
+to compile the necessary c++ files. After compiling the dependent files, you can go to the root directory and run
+```
+sh run_GXN.sh [DATANAME] [DATAFOLD] [GPUNUM]
+```
 
 
 
