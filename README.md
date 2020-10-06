@@ -4,3 +4,11 @@ We propose a novel graph cross network (GXN) to achieve comprehensive feature le
 ## Our paper
 Graph Cross Networks with Vertex Infomax Pooling (NeurIPS 2020) [paper](https://arxiv.org/abs/2010.01804)
 
+## Module Requirement
+* Python 3.6
+* Pytorch 1.1
+* numpy
+
+## Acknowledgement
+Our program is built based on the code of [DGCNN](https://github.com/muhanzhang/pytorch_DGCNN) and [Graph U-Nets](https://github.com/HongyangGao/Graph-U-Nets). We appreciate their contribution on the technique development and released codes.
+
