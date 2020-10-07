@@ -20,7 +20,11 @@ to compile the necessary c++ files. After compiling the dependent files, you can
 ```
 sh run_GXN.sh [DATANAME] [DATAFOLD] [GPUNUM]
 ```
-
+If you want to train and test model on COLLAB dataset, you should first unzip files, because the original file is large - for convenience, we upload the compressed file directly. Type
+```
+cd ./GraphClassificationData/COLLAB
+unzip COLLAB.zip
+```
 
 
 
