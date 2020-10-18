@@ -17,9 +17,9 @@ n_hidden=128  # final dense layer's hidden size
 bsize=20  # batch size
 dropout=True
 cross_weight=1.0
-fuse_weight=1.0
+fuse_weight=0.9
 Rhop=1
-data_root='./GraphClassificationData/'
+data_root='/DATA2/data/msli/GraphClassificationData_'
 
 # dataset-specific settings
 case ${DATA} in
@@ -35,34 +35,34 @@ IMDBMULTI)
   learning_rate=0.001
   sortpooling_k=0.9
   k1=0.8
-  k2=0.5
+  k2=0.7
   ;;
 COLLAB)
   num_epochs=100
   learning_rate=0.001
   sortpooling_k=0.9
   k1=0.9
-  k2=0.7
+  k2=0.5
   ;;
 DD)
   num_epochs=100
   learning_rate=0.0005
-  k1=0.9
-  k2=0.5
+  k1=0.8
+  k2=0.6
   ;;
 PROTEINS)
   num_epochs=100
   learning_rate=0.001
   sortpooling_k=0.6
-  k1=0.9
-  k2=0.8
+  k1=0.8
+  k2=0.7
   ;;
 ENZYMES)
   num_epochs=500
   learning_rate=0.0001
   sortpooling_k=0.8
-  k1=0.9
-  k2=0.8
+  k1=0.7
+  k2=0.5
   ;;
 *)
   num_epochs=500
