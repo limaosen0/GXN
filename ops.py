@@ -101,58 +101,20 @@ class GCN_MI(nn.Module):
         return self.act(out).squeeze(0)
 
 
-# class GCN(nn.Module):
-
-#     def __init__(self, in_dim, out_dim):
-#         super(GCN, self).__init__()
-#         self.proj = nn.Linear(in_dim, out_dim)
-#         self.drop = nn.Dropout(p=0.3)
-
-#     def forward(self, A, X, act=None):
-#         X = self.drop(X)
-#         X = torch.matmul(A, X)
-#         X = self.proj(X)
-#         if act is not None:
-#             X = act(X)
-#         return X
-
-
 class GCN(nn.Module):
 
-    def __init__(self, in_dim, out_dim, bias=True, bn=True):
+    def __init__(self, in_dim, out_dim):
         super(GCN, self).__init__()
-        self.in_dim = in_dim
-        self.out_dim = out_dim
-        self.bn = bn
-
-        self.weight = nn.Parameter(torch.FloatTensor(in_dim, out_dim))
-        if bias:
-            self.bias = nn.Parameter(torch.FloatTensor(out_dim))
-        else:
-            self.register_parameter('bias', None)
-        if bn:
-            self.batchnorm = nn.BatchNorm1d(out_dim)
-        self.drop = nn.Dropout(p=0.5)
-        self.reset_parameters()
-
-    def reset_parameters(self):
-        stdv = 1. / math.sqrt(self.weight.size(1))
-        self.weight.data.uniform_(-stdv, stdv)
-        if self.bias is not None:
-            self.bias.data.uniform_(-stdv, stdv)
+        self.proj = nn.Linear(in_dim, out_dim)
+        self.drop = nn.Dropout(p=0.3)
 
     def forward(self, A, X, act=None):
-        support = torch.matmul(X, self.weight)
-        output = torch.matmul(A, support)
-        if self.bias is not None:
-            output = output + self.bias
-        if self.bn:
-            output = self.batchnorm(output.unsqueeze(-1)).squeeze()
+        X = self.drop(X)
+        X = torch.matmul(A, X)
+        X = self.proj(X)
         if act is not None:
-            output = act(output)
-        output = self.drop(output)
-        return output
-
+            X = act(X)
+        return X
 
 
 class Discriminator(nn.Module):
@@ -267,9 +229,9 @@ class GraphCrossnet(nn.Module):
             x_s23_fu = self.pool_s23_2(A_s2, x_s2, idx_s2, idx_s2_, value_s2)
             x_s32_fu = self.unpool_s32_2(A_s2, x_s3, idx_s2)
 
-            x_s1 = x_s1 + self.cs_w * 0.01 * x_s21_fu
-            x_s2 = x_s2 + self.cs_w * 0.01 * (x_s12_fu + x_s32_fu)/2
-            x_s3 = x_s3 + self.cs_w * 0.01 * x_s23_fu
+            x_s1 = x_s1 + self.cs_w * 0.05 * x_s21_fu
+            x_s2 = x_s2 + self.cs_w * 0.05 * (x_s12_fu + x_s32_fu)/2
+            x_s3 = x_s3 + self.cs_w * 0.05 * x_s23_fu
 
         x_s1 = self.s1_l3(A_s1, x_s1, F.relu)
         x_s2 = self.s2_l3(A_s2, x_s2, F.relu)
@@ -277,7 +239,7 @@ class GraphCrossnet(nn.Module):
         
         x_s3_out = self.unpool_s32_end(A_s2, x_s3, idx_s2) + Xdown_s2
         x_s2_out = self.unpool_s21_end(A_s1, x_s2 + x_s3_out, idx_s1)
-        x_agg = x_s1 + x_s2_out * self.fs_w + Xdown_s1
+        x_agg = x_s1 + x_s2_out * self.fs_w + Xdown_s1 * self.fs_w
         x_agg = torch.cat([x_agg, x_org], 1)
         x_agg = self.end_gcn(A_s1, x_agg)
 
@@ -293,7 +255,7 @@ class IndexSelect(nn.Module):
         self.sigm = nn.Sigmoid()
         self.fc = MLP(n_h, n_h, act)
         self.disc = Discriminator(n_h)
-        self.gcn1 = GCN(n_h, n_h, bn=False)
+        self.gcn1 = GCN(n_h, n_h)
 
     def forward(self, seq1, seq2, A, samp_bias1=None, samp_bias2=None):
         h_1 = self.fc(seq1)
