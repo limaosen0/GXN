@@ -144,6 +144,11 @@ def loop_dataset(g_list, classifier, mi_loss, sample_idxes, epoch, optimizer=Non
         total_loss.append(np.array([cls_loss, miloss, loss, acc]) * len(selected_idx))
         n_samples += len(selected_idx)
 
+        # ------------------------------------------------------------------------------------------------------------------
+        if optimizer is None:
+            print(acc)
+        # ------------------------------------------------------------------------------------------------------------------
+
     if optimizer is None:
         assert n_samples == len(sample_idxes)
 
@@ -212,8 +217,8 @@ def model_run(cmd_args, g_list, device, foldidx, first_timstr):
             f.write(str(cmd_args) + '\n')
 
 
-    if not os.path.exists('./checkpoint_%s/time_%s'  % (cmd_args.data, timstr)):
-        os.makedirs('./checkpoint_%s/time_%s'  % (cmd_args.data, timstr))
+    if not os.path.exists('./checkpoint_%s/time_%s/FOLD%s'  % (cmd_args.data, first_timstr, foldidx)):
+        os.makedirs('./checkpoint_%s/time_%s/FOLD%s'  % (cmd_args.data, first_timstr, foldidx))
 
 
     if cmd_args.weight is not None:
@@ -251,7 +256,7 @@ def model_run(cmd_args, g_list, device, foldidx, first_timstr):
 
         if test_loss[3] > max_acc:
             max_acc = test_loss[3]
-            fname = './checkpoint_%s/time_%s/model_epoch%s.pt' % (cmd_args.data, timstr, str(epoch))
+            fname = './checkpoint_%s/time_%s/FOLD%s/model_epoch%s.pt' % (cmd_args.data, first_timstr, foldidx, str(epoch))
             torch.save(classifier.state_dict(), fname)
 
     with open('./result_%s/result_%s/acc_result_%s_%s.txt' % (cmd_args.data, first_timstr, cmd_args.data, first_timstr), 'a+') as f:
@@ -285,20 +290,7 @@ if __name__ == '__main__':
     # print('# train: %d, # test: %d' % (len(train_graphs), len(test_graphs)))
     print('# num of classes: ', cmd_args.num_class)
 
-    if cmd_args.fold==0:
-        max_accs = []
-        print('Lets start 10-fold cross validation')
-        for foldidx in range(10):
-            print('start training ------> fold', foldidx + 1)
-            print(cmd_args)
-            # sep_data(cmd_args.data_root, g_list, foldidx + 1, seed=0)
-            max_acc = model_run(cmd_args, g_list, device, foldidx + 1, first_timstr)
-            max_accs.append(max_acc)
-        with open('./result_%s/result_%s/acc_result_%s_%s.txt' % (cmd_args.data, first_timstr, cmd_args.data, first_timstr), 'a+') as f:
-            f.write('\n')
-            f.write('Mean_ACC: ' + str(np.mean(max_accs)) )
-    else:
-        print('Lets start a single-fold validation')
-        print('start training ------> fold', cmd_args.fold)
-        model_run(cmd_args, g_list, device, cmd_args.fold, first_timstr)
+    print('Lets start a single-fold validation')
+    print('start training ------> fold', cmd_args.fold)
+    model_run(cmd_args, g_list, device, cmd_args.fold, first_timstr)
     
